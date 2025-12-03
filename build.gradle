@@ -1,41 +1,38 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'io.qameta.allure' version '2.12.0' // плагин для генерации отчётов Allure
 }
 
-group = 'puhtel.liya'
-version = '1.0-SNAPSHOT'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java']
+allure {
+    report {
+        version.set("2.29.0") // версия Allure отчётов
+    }
+    adapter { // отвечает за появление папочки build/allure-results
+        aspectjWeaver.set(false) // обработка аннотации @Step (отключено из-за проблем с Java 25)
+        frameworks {
+            junit5 { // название фреймворка
+                adapterVersion.set("2.29.0") // версия интеграции фреймворка и Allure
+            }
         }
     }
 }
 
 repositories {
-    mavenCentral()
+    mavenCentral() // репозиторий для загрузки зависимостей
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4' // JUnit 5 для тестирования
+    testImplementation 'com.codeborne:selenide:7.7.3' // Selenide для автоматизации браузера
+    testImplementation 'io.qameta.allure:allure-selenide:2.29.0' // интеграция Allure с Selenide
+    testImplementation "org.slf4j:slf4j-simple:2.0.12" // логирование
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.11.4') // движок JUnit 5
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // кодировка для компиляции Java файлов
 }
 
 test {
-    useJUnitPlatform()
-}
-
-compileJava {
-    options.encoding = 'UTF-8'
-}
-
-tasks.withType(JavaExec) {
-    jvmArgs = ['-Dfile.encoding=UTF-8', '-Dconsole.encoding=UTF-8']
+    useJUnitPlatform() // использовать JUnit Platform для запуска тестов
 }
